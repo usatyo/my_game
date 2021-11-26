@@ -1,62 +1,36 @@
 import style from '../styles/Cell.module.scss'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const playSize = 10;
+const YELLOW = 0
+const RED = 1
+const BLUE = 2
+const LIGHTRED = 3
+const LIGHTBLUE = 4
+
 const undefArray = new Array(playSize)
 const undefFill = new Array(playSize)
 undefArray.fill(undefined)
 undefFill.fill(undefArray)
 
 const Cell = () => {
-
-  // undefined -> unclicked
-  // null -> yellow(next player can set)
-  // true -> red clicked
-  // false -> blue clicked
   const [cellInfo, setCellInfo] = useState(undefFill)
-
   const [isRed, setIsRed] = useState(true)
   let changedInfo = cellInfo
 
-  // const setRedBlueCell = (clickedX, clickedY) => {
-  //   const changedInfo = cellInfo.map((array, x) => {
-  //     return (
-  //       array.map((value, y) => {
-  //         return (clickedX === x && clickedY === y ? (
-  //           isRed ? 1 : 2
-  //         ) : (
-  //           value === 0 || value === undefined ? undefined : value
-  //         ))
-  //       })
-  //     )
-  //   })
-  //   setCellInfo(changedInfo)
-  // }
+  useEffect(() => {
+    colorRedBlueCell(0, 0, RED)
+    colorRedBlueCell(0, playSize - 1, BLUE)
+    colorRedBlueCell(playSize - 1, 0, BLUE)
+    colorRedBlueCell(playSize - 1, playSize - 1, RED)
+  }, [])
 
-  // // true -> 0 yellow cell 
-  // const setYellowCell = (clickedX, clickedY) => {
-  //   const changedInfo = cellInfo.map((array, x) => {
-  //     return (
-  //       array.map((value, y) => {
-  //         return (Math.abs(clickedX - x) <= 1
-  //         && Math.abs(clickedY - y) <= 1
-  //         && value === undefined ? 0 : value)
-  //       })
-  //     )
-  //   })
-  //   setCellInfo(changedInfo)
-  //   const endGame = false
-  //   return endGame
-  // }
-
-  const setRedBlueCell = (clickedX, clickedY) => {
+  const colorRedBlueCell = (targetX, targetY, color) => {
     changedInfo = changedInfo.map((array, x) => {
       return (
         array.map((value, y) => {
-          return (clickedX === x && clickedY === y ? (
-            isRed ? true : false
-          ) : (
-            value === null || value === undefined ? undefined : value
+          return (targetX === x && targetY === y ? color : (
+            value === YELLOW || value === undefined ? undefined : value
           ))
         })
       )
@@ -64,32 +38,31 @@ const Cell = () => {
     setCellInfo(changedInfo)
   }
 
-  // true -> 0 yellow cell 
-  const setYellowCell = (clickedX, clickedY) => {
+  const colorYellowCell = (targetX, targetY) => {
     changedInfo = changedInfo.map((array, x) => {
       return (
         array.map((value, y) => {
-          return (Math.abs(clickedX - x) <= 1
-            && Math.abs(clickedY - y) <= 1
-            && value === undefined ? null : value)
+          return (Math.abs(targetX - x) <= 1
+            && Math.abs(targetY - y) <= 1
+            && (value === undefined || value === YELLOW) ? YELLOW : 
+              value === YELLOW || value === undefined ? undefined : value
+            )
         })
       )
     })
     setCellInfo(changedInfo)
-    const endGame = false
-    return endGame
   }
 
   const handleClick = (clickedX, clickedY) => {
-    if (changedInfo[clickedX][clickedY] !== undefined
-      && changedInfo[clickedX][clickedY] !== null) return
 
-    setRedBlueCell(clickedX, clickedY)
-    console.log(changedInfo)
-    if (setYellowCell(clickedX, clickedY)) {
-      // finish game code
+    if (changedInfo[clickedX][clickedY] === (isRed ? RED : BLUE)){
+      colorYellowCell(clickedX, clickedY)
+      return
     }
-    console.log(changedInfo)
+    
+    if (changedInfo[clickedX][clickedY] !== YELLOW) return
+
+    colorRedBlueCell(clickedX, clickedY, isRed ? RED : BLUE)
     setIsRed(!isRed)
   }
 
@@ -102,11 +75,14 @@ const Cell = () => {
               <input
                 type='button'
                 key={x + '_' + y}
-                className={value === undefined ? style.unColored : (
-                  value === null ? style.yellow : (
-                    value ? style.red : style.blue
-                  )
-                )}
+                className={
+                  value === undefined ? style.unColored : (
+                    value === YELLOW ? style.yellow : (
+                      value === RED ? style.red : (
+                        value === BLUE ? style.blue : (
+                          value === LIGHTRED ? style.lightRed : (
+                            value === LIGHTBLUE ? style.lightBlue : ''
+                          )))))}
                 onClick={() => handleClick(x, y)}
                 style={{
                   position: 'absolute',
