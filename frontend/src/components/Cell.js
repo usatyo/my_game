@@ -9,37 +9,104 @@ undefFill.fill(undefArray)
 
 const Cell = () => {
 
+  // undefined -> unclicked
+  // null -> yellow(next player can set)
+  // true -> red clicked
+  // false -> blue clicked
   const [cellInfo, setCellInfo] = useState(undefFill)
+
   const [isRed, setIsRed] = useState(true)
+  let changedInfo = cellInfo
 
-  const handleClick = (clickedX, clickedY) => {
-    if(cellInfo[clickedX][clickedY] !== undefined) return
+  // const setRedBlueCell = (clickedX, clickedY) => {
+  //   const changedInfo = cellInfo.map((array, x) => {
+  //     return (
+  //       array.map((value, y) => {
+  //         return (clickedX === x && clickedY === y ? (
+  //           isRed ? 1 : 2
+  //         ) : (
+  //           value === 0 || value === undefined ? undefined : value
+  //         ))
+  //       })
+  //     )
+  //   })
+  //   setCellInfo(changedInfo)
+  // }
 
-    const changedInfo = cellInfo.map((array, x) => {
+  // // true -> 0 yellow cell 
+  // const setYellowCell = (clickedX, clickedY) => {
+  //   const changedInfo = cellInfo.map((array, x) => {
+  //     return (
+  //       array.map((value, y) => {
+  //         return (Math.abs(clickedX - x) <= 1
+  //         && Math.abs(clickedY - y) <= 1
+  //         && value === undefined ? 0 : value)
+  //       })
+  //     )
+  //   })
+  //   setCellInfo(changedInfo)
+  //   const endGame = false
+  //   return endGame
+  // }
+
+  const setRedBlueCell = (clickedX, clickedY) => {
+    changedInfo = changedInfo.map((array, x) => {
       return (
         array.map((value, y) => {
-          return (clickedX !== x || clickedY !== y ? value : (
+          return (clickedX === x && clickedY === y ? (
             isRed ? true : false
+          ) : (
+            value === null || value === undefined ? undefined : value
           ))
         })
       )
     })
     setCellInfo(changedInfo)
+  }
+
+  // true -> 0 yellow cell 
+  const setYellowCell = (clickedX, clickedY) => {
+    changedInfo = changedInfo.map((array, x) => {
+      return (
+        array.map((value, y) => {
+          return (Math.abs(clickedX - x) <= 1
+            && Math.abs(clickedY - y) <= 1
+            && value === undefined ? null : value)
+        })
+      )
+    })
+    setCellInfo(changedInfo)
+    const endGame = false
+    return endGame
+  }
+
+  const handleClick = (clickedX, clickedY) => {
+    if (changedInfo[clickedX][clickedY] !== undefined
+      && changedInfo[clickedX][clickedY] !== null) return
+
+    setRedBlueCell(clickedX, clickedY)
+    console.log(changedInfo)
+    if (setYellowCell(clickedX, clickedY)) {
+      // finish game code
+    }
+    console.log(changedInfo)
     setIsRed(!isRed)
   }
 
-  console.log(cellInfo[0][0])
   return (
     <>
-      {cellInfo.map((array, x) => {
+      {changedInfo.map((array, x) => {
         return (
           array.map((value, y) => {
             return (
               <input
-                type="button"
-                className={cellInfo[x][y] === undefined ? style.unColored : (
-                  cellInfo[x][y] ? style.red : style.blue
-                ) }
+                type='button'
+                key={x + '_' + y}
+                className={value === undefined ? style.unColored : (
+                  value === null ? style.yellow : (
+                    value ? style.red : style.blue
+                  )
+                )}
                 onClick={() => handleClick(x, y)}
                 style={{
                   position: 'absolute',

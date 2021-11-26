@@ -4,11 +4,11 @@ import Play from './pages/Play'
 
 function App() {
   return (
-    <div className="App">
+    <div className='App'>
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Home/>} />
-          <Route path="/playing" element={<Play/>} />
+          <Route path='/playing' element={<Play/>} />
           {/* <Route component={NotFound} /> */}
         </Routes>
       </BrowserRouter>

@@ -9,8 +9,8 @@ const Home = () => {
 
   return (
     <>
-      {/* <input type="button" value='Game Start' onClick={handleClick} /> */}
-      <Link to="/playing" className={styles.startButton}>Game Start</Link>
+      {/* <input type='button' value='Game Start' onClick={handleClick} /> */}
+      <Link to='/playing' className={styles.startButton}>Game Start</Link>
     </>
   )
 }
