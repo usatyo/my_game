@@ -1,7 +1,7 @@
 import style from '../styles/Cell.module.scss'
 import { useState, useEffect } from 'react'
 
-const playSize = 4;
+const playSize = 5;
 const RED = 0
 const BLUE = 1
 const LIGHTRED = 2
@@ -29,16 +29,16 @@ const Cell = () => {
   let changedInfo = cellInfo
   let changedPlace = currentPlace.slice()
 
-  const checkWinner = (color) => {
-    const conditionArray = changedInfo.map((array, x) => (
+  const checkPlace = (color) => {
+    const conditionBool = changedInfo.map((array, x) => (
       array.map((value, y) => (
         value === undefined && (
-          (Math.abs(changedPlace[color][0].x - x) <= 1 && Math.abs(changedPlace[color][0].y - y) <= 1) ||
-          (Math.abs(changedPlace[color][1].x - x) <= 1 && Math.abs(changedPlace[color][1].y - y) <= 1)
+          (Math.abs(x - changedPlace[color][0].x) <= 1 && Math.abs(y - changedPlace[color][0].y) <= 1) ||
+          (Math.abs(x - changedPlace[color][1].x) <= 1 && Math.abs(y - changedPlace[color][1].y) <= 1)
         )
       ))
     ))
-    return conditionArray.map(array => (
+    return conditionBool.map(array => (
       array.reduce((previous, current) => (
         previous || current
       ))
@@ -48,8 +48,8 @@ const Cell = () => {
   }
 
   const endProcess = () => {
-    const redCanPlace = checkWinner(RED)
-    const blueCanPlace = checkWinner(BLUE)
+    const redCanPlace = checkPlace(RED)
+    const blueCanPlace = checkPlace(BLUE)
     if (!redCanPlace && !blueCanPlace) {
       console.log('tie')
     } else if (!blueCanPlace && isRed) {
@@ -68,12 +68,8 @@ const Cell = () => {
     ))
     setCellInfo(changedInfo)
     if (color !== RED && color !== BLUE) return
-    let moved = 0
-    if (changedPlace[color][1].x === selected.x && changedPlace[color][1].y === selected.y) {
-      moved = 1
-    }
-    changedPlace[color][moved].x = targetX
-    changedPlace[color][moved].y = targetY
+    const moved = (changedPlace[color][0].x === selected.x && changedPlace[color][0].y === selected.y) ? 0 : 1
+    changedPlace[color][moved] = { x: targetX, y: targetY }
     setCurrentPlace(changedPlace)
     return
   }
