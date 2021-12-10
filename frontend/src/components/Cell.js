@@ -1,5 +1,6 @@
 import style from '../styles/Cell.module.scss'
 import { useState, useEffect } from 'react'
+import { clearActions, setActions, unsub } from '../utils/api';
 
 const playSize = 5;
 const RED = 0
@@ -24,8 +25,11 @@ const Cell = () => {
   const [selected, setSelected] = useState(undefPlace)
   // コマのあるマス（１つ目のインデックスで色、２つ目のインデックスでどちらかを指定）
   const [currentPlace, setCurrentPlace] = useState(undefCurrntPlace)
-  // どちらの番か
-  const [isRed, setIsRed] = useState(true)
+  // 何巡目か
+  const [Turn, setTurn] = useState(1)
+  // 自分の色
+  // const [myColor, setMyColor] = useState(undefined)
+  const isRed = (Turn % 2 === 1)
   let changedInfo = cellInfo
   let changedPlace = currentPlace.slice()
 
@@ -50,6 +54,8 @@ const Cell = () => {
   const endProcess = () => {
     const redCanPlace = checkPlace(RED)
     const blueCanPlace = checkPlace(BLUE)
+    unsub()
+    clearActions()
     if (!redCanPlace && !blueCanPlace) {
       console.log('tie')
     } else if (!blueCanPlace && isRed) {
@@ -71,6 +77,7 @@ const Cell = () => {
     const moved = (changedPlace[color][0].x === selected.x && changedPlace[color][0].y === selected.y) ? 0 : 1
     changedPlace[color][moved] = { x: targetX, y: targetY }
     setCurrentPlace(changedPlace)
+    setActions(Turn, targetX, targetY, moved)
     return
   }
 
@@ -97,7 +104,7 @@ const Cell = () => {
       [{ x: 0, y: 0 }, { x: playSize - 1, y: playSize - 1 }],
       [{ x: 0, y: playSize - 1 }, { x: playSize - 1, y: 0 }]
     ])
-  }, [])
+  }, []) // eslint-disable-line
 
   const handleClick = (clickedX, clickedY) => {
     if (changedInfo[clickedX][clickedY] === (isRed ? RED : BLUE)) {
@@ -108,7 +115,7 @@ const Cell = () => {
     colorCell(clickedX, clickedY, isRed ? RED : BLUE)
     colorCell(selected.x, selected.y, isRed ? LIGHTRED : LIGHTBLUE)
     endProcess()
-    setIsRed(!isRed)
+    setTurn(Turn + 1)
     return
   }
 
