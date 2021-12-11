@@ -1,6 +1,7 @@
 import style from '../styles/Cell.module.scss'
-import { useState, useEffect } from 'react'
+import { useEffect, useContext } from 'react'
 import { clearActions, setActions, unsub } from '../utils/api';
+import { AppContext } from '../contexts/AppContext'
 
 const playSize = 5;
 const RED = 0
@@ -9,28 +10,14 @@ const LIGHTRED = 2
 const LIGHTBLUE = 3
 const YELLOW = 4
 
-const undefArray = new Array(playSize)
-const undefCellInfo = new Array(playSize)
-undefArray.fill(undefined)
-undefCellInfo.fill(undefArray)
-
-const undefPlace = { x: undefined, y: undefined }
-const undefPlaces = [undefPlace, undefPlace]
-const undefCurrntPlace = [undefPlaces, undefPlaces]
-
 const Cell = () => {
-  // 各マスの色
-  const [cellInfo, setCellInfo] = useState(undefCellInfo)
-  // 選択されているコマがあるマス
-  const [selected, setSelected] = useState(undefPlace)
-  // コマのあるマス（１つ目のインデックスで色、２つ目のインデックスでどちらかを指定）
-  const [currentPlace, setCurrentPlace] = useState(undefCurrntPlace)
-  // 何巡目か
-  const [Turn, setTurn] = useState(1)
-  // 自分の色
-  // const [myColor, setMyColor] = useState(undefined)
-  const isRed = (Turn % 2 === 1)
-  let changedInfo = cellInfo
+  const { cellInfo, setCellInfo } = useContext(AppContext)
+  const { selected, setSelected } = useContext(AppContext)
+  const { currentPlace, setCurrentPlace } = useContext(AppContext)
+  const { turn, setTurn } = useContext(AppContext)
+
+  const isRed = (turn % 2 === 1)
+  let changedInfo = cellInfo.slice()
   let changedPlace = currentPlace.slice()
 
   const checkPlace = (color) => {
@@ -54,9 +41,9 @@ const Cell = () => {
   const endProcess = () => {
     const redCanPlace = checkPlace(RED)
     const blueCanPlace = checkPlace(BLUE)
-    unsub()
-    clearActions()
     if (!redCanPlace && !blueCanPlace) {
+      unsub()
+      clearActions()
       console.log('tie')
     } else if (!blueCanPlace && isRed) {
       console.log('red win')
@@ -77,7 +64,7 @@ const Cell = () => {
     const moved = (changedPlace[color][0].x === selected.x && changedPlace[color][0].y === selected.y) ? 0 : 1
     changedPlace[color][moved] = { x: targetX, y: targetY }
     setCurrentPlace(changedPlace)
-    setActions(Turn, targetX, targetY, moved)
+    setActions(turn, targetX, targetY, moved)
     return
   }
 
@@ -107,6 +94,7 @@ const Cell = () => {
   }, []) // eslint-disable-line
 
   const handleClick = (clickedX, clickedY) => {
+    // if (isRed ? RED : BLUE !== RED) return
     if (changedInfo[clickedX][clickedY] === (isRed ? RED : BLUE)) {
       colorYellowCell(clickedX, clickedY)
       return
@@ -115,7 +103,7 @@ const Cell = () => {
     colorCell(clickedX, clickedY, isRed ? RED : BLUE)
     colorCell(selected.x, selected.y, isRed ? LIGHTRED : LIGHTBLUE)
     endProcess()
-    setTurn(Turn + 1)
+    setTurn(turn + 1)
     return
   }
 
@@ -147,3 +135,8 @@ const Cell = () => {
 }
 
 export default Cell
+
+// export const firebaseUpdate = (x, y, moved) => {
+//   let changedInfo = cellInfo
+//   changedInfo[x][y] = BLUE
+// }

@@ -1,6 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, where } from 'firebase/firestore'
+import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query } from 'firebase/firestore'
+import { firebaseUpdate } from '../components/Cell'
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,11 +20,11 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
-let q
+const q = query(collection(db, 'actions'))
 
 export const setActions = async (move, x, y, which) => {
   const actionsRef = collection(db, 'actions')
-  await setDoc(doc(actionsRef, `move(${move})`), {
+  await setDoc(doc(actionsRef, 'move(' + ('0000' + move).slice(-4) + ')'), {
     which: which,
     x: x,
     y: y,
@@ -31,21 +32,19 @@ export const setActions = async (move, x, y, which) => {
   })
 }
 
-export const changeQuery = (move) => {
-  q = query(collection(db, 'actions'), where('move', '==', `${move}`))
-}
-
 export const unsub = onSnapshot(q, (querySnapshot) => {
-  const x, y
+  let which, x, y
   querySnapshot.forEach((doc) => {
+    which = doc.data().which
     x = doc.data().x
     y = doc.data().y
   })
+  // firebaseUpdate(x, y, which)
 })
 
 export const clearActions = async () => {
   let i = 0
-  for(i = 0; i < 49; i++){
+  for(i = 1; i < 50; i++){
     await deleteDoc(doc(db, 'actions', `move(${i})`))
   }
 }
